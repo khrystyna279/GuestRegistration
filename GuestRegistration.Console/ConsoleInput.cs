@@ -8,30 +8,15 @@ internal static class ConsoleInput
         return Console.ReadLine() ?? throw new EndOfStreamException();
     }
 
-    public static string ReadSecret(string prompt)
+    public static DateTime ReadUtcDateTime(string prompt)
     {
-        if (Console.IsInputRedirected) return Read(prompt);
-        Console.Write(prompt + ": ");
-        string value = "";
-        while (true)
-        {
-            var key = Console.ReadKey(true);
-            if (key.Key == ConsoleKey.Enter)
-            {
-                Console.WriteLine();
-                return value;
-            }
-            if (key.Key == ConsoleKey.Backspace && value.Length > 0)
-            {
-                value = value[..^1];
-                Console.Write("\b \b");
-            }
-            else if (!char.IsControl(key.KeyChar))
-            {
-                value += key.KeyChar;
-                Console.Write('*');
-            }
-        }
+        string text = Read(prompt + " (UTC, yyyy-MM-dd HH:mm:ss)");
+        if (!DateTime.TryParseExact(text, "yyyy-MM-dd HH:mm:ss",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+            out DateTime value))
+            throw new ArgumentException("Дата й час мають бути у форматі yyyy-MM-dd HH:mm:ss.");
+        return value;
     }
 
     public static int ReadInt(string prompt)

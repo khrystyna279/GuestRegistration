@@ -10,7 +10,7 @@ public class LoginAttemptRepositoryTests : IDisposable
     private readonly TestDatabase _database = new();
     private LoginAttemptRepository Repository => new(_database.Context);
 
-    [SqlServerFact]
+    [Fact]
     public void Create_SavesKnownUserAttempt()
     {
         var user = _database.AddUser();
@@ -20,7 +20,7 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.Equal(user.Id, Repository.GetById(attempt.Id)!.UserId);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Create_AllowsNullUserIdForUnknownLogin()
     {
         var attempt = TestDatabase.NewAttempt(null);
@@ -29,7 +29,7 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.Null(Repository.GetById(saved.Id)!.UserId);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void GetAll_ReturnsSavedAttempts()
     {
         Repository.Create(TestDatabase.NewAttempt(null));
@@ -37,10 +37,10 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.Equal(2, Repository.GetAll().Count);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void GetById_ReturnsNullForMissingAttempt() => Assert.Null(Repository.GetById(999));
 
-    [SqlServerFact]
+    [Fact]
     public void Update_ChangesPersistedAttempt()
     {
         var attempt = Repository.Create(TestDatabase.NewAttempt(null));
@@ -52,11 +52,11 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.False(Repository.GetById(attempt.Id)!.IsSuccessful);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Update_ReturnsFalseForMissingAttempt() =>
         Assert.False(Repository.Update(new LoginAttempt { Id = 999 }));
 
-    [SqlServerFact]
+    [Fact]
     public void Delete_RemovesAttempt()
     {
         var attempt = Repository.Create(TestDatabase.NewAttempt(null));
@@ -65,11 +65,11 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.False(Repository.Delete(attempt.Id));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Create_RejectsNonexistentUser() =>
         Assert.Throws<DbUpdateException>(() => Repository.Create(TestDatabase.NewAttempt(999)));
 
-    [SqlServerFact]
+    [Fact]
     public void Transaction_RollbackCancelsRepositorySave()
     {
         using (var transaction = _database.Context.Database.BeginTransaction())

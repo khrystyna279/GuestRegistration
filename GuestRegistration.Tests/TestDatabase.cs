@@ -1,6 +1,5 @@
 using GuestRegistration.DAL.Data;
 using GuestRegistration.DAL.Models;
-using GuestRegistration.DAL.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +14,7 @@ public class TestDatabase : IDisposable
     public TestDatabase()
     {
         string connectionString = Environment.GetEnvironmentVariable("GUEST_TEST_CONNECTION")
-            ?? throw new InvalidOperationException("Set GUEST_TEST_CONNECTION before running SQL Server tests.");
+            ?? "Server=localhost;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=5";
         var admin = new SqlConnectionStringBuilder(connectionString) { InitialCatalog = "master", Pooling = false };
         _adminConnectionString = admin.ConnectionString;
         using (var connection = new SqlConnection(_adminConnectionString))
@@ -38,9 +37,6 @@ public class TestDatabase : IDisposable
         catch { Dispose(); throw; }
     }
 
-    public void Seed() => Context.Database.ExecuteSqlRaw(File.ReadAllText(
-        Path.Combine(AppContext.BaseDirectory, "sql", "02_SeedData.sql")));
-
     public User AddUser(string login = "test_user")
     {
         var user = NewUser(login);
@@ -52,8 +48,8 @@ public class TestDatabase : IDisposable
     public static User NewUser(string login = "test_user") => new()
     {
         Login = login, FirstName = "Test", LastName = "Student",
-        PasswordHash = PasswordHasher.Hash("Student123!"),
-        RecoveryWordHash = PasswordHasher.Hash("school"),
+        PasswordHash = "demo_password_hash",
+        RecoveryWordHash = "demo_recovery_hash",
         Gender = "Other", Address = "Test Street 1", Email = login + "@example.com",
         Phone = "+380991234567", CreatedAtUtc = DateTime.UtcNow
     };
@@ -67,15 +63,6 @@ public class TestDatabase : IDisposable
     public static LoginAttempt NewAttempt(int? userId) => new()
     {
         UserId = userId, LoginEntered = "test_user", AttemptedAtUtc = DateTime.UtcNow, IsSuccessful = true
-    };
-
-    public static RegistrationRequest NewRegistration() => new()
-    {
-        Login = "new_guest", FirstName = "Test", LastName = "Student",
-        Password = "Student123!", ConfirmPassword = "Student123!", RecoveryWord = "school",
-        Gender = "Other", Address = "Test Street 1", Email = "new_guest@example.com",
-        Phone = "+380991234567", CardNumber = "4111111111111111", CardHolder = "TEST STUDENT",
-        ExpirationMonth = 12, ExpirationYear = 2099
     };
 
     public void Dispose()

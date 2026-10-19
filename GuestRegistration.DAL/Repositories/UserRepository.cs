@@ -20,16 +20,6 @@ public class UserRepository : IUserRepository
 
     public List<User> GetAll() => _context.Users.AsNoTracking().OrderBy(user => user.Id).ToList();
     public User? GetById(int id) => _context.Users.AsNoTracking().FirstOrDefault(user => user.Id == id);
-    public User? GetByLogin(string login)
-    {
-        string normalizedLogin = login.Trim().ToLowerInvariant();
-        return _context.Users.AsNoTracking().FirstOrDefault(user => user.Login == normalizedLogin);
-    }
-    public User? GetByEmail(string email)
-    {
-        string normalizedEmail = email.Trim().ToLowerInvariant();
-        return _context.Users.AsNoTracking().FirstOrDefault(user => user.Email == normalizedEmail);
-    }
 
     public bool Update(User user)
     {

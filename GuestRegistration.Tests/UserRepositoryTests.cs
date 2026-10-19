@@ -10,7 +10,7 @@ public class UserRepositoryTests : IDisposable
     private readonly TestDatabase _database = new();
     private UserRepository Repository => new(_database.Context);
 
-    [SqlServerFact]
+    [Fact]
     public void Create_SavesUserAndGeneratesId()
     {
         var user = Repository.Create(TestDatabase.NewUser());
@@ -18,7 +18,7 @@ public class UserRepositoryTests : IDisposable
         Assert.Equal("test_user", Repository.GetById(user.Id)!.Login);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void GetAll_ReturnsSavedUsersInIdOrder()
     {
         Repository.Create(TestDatabase.NewUser("first"));
@@ -26,18 +26,10 @@ public class UserRepositoryTests : IDisposable
         Assert.Equal(new[] { "first", "second" }, Repository.GetAll().Select(user => user.Login));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void GetById_ReturnsNullForMissingUser() => Assert.Null(Repository.GetById(999));
 
-    [SqlServerFact]
-    public void Lookup_NormalizesLoginAndEmail()
-    {
-        var user = Repository.Create(TestDatabase.NewUser());
-        Assert.Equal(user.Id, Repository.GetByLogin(" TEST_USER ")!.Id);
-        Assert.Equal(user.Id, Repository.GetByEmail(" TEST_USER@EXAMPLE.COM ")!.Id);
-    }
-
-    [SqlServerFact]
+    [Fact]
     public void Update_ChangesPersistedFields()
     {
         var user = Repository.Create(TestDatabase.NewUser());
@@ -49,10 +41,10 @@ public class UserRepositoryTests : IDisposable
         Assert.Equal("+380999999999", Repository.GetById(user.Id)!.Phone);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Update_ReturnsFalseForMissingUser() => Assert.False(Repository.Update(new User { Id = 999 }));
 
-    [SqlServerFact]
+    [Fact]
     public void Delete_RemovesUser()
     {
         var user = Repository.Create(TestDatabase.NewUser());
@@ -61,7 +53,7 @@ public class UserRepositoryTests : IDisposable
         Assert.False(Repository.Delete(user.Id));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Create_RejectsDuplicateLogin()
     {
         Repository.Create(TestDatabase.NewUser());
@@ -71,7 +63,7 @@ public class UserRepositoryTests : IDisposable
         Assert.Single(Repository.GetAll());
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Create_RejectsDuplicateEmail()
     {
         Repository.Create(TestDatabase.NewUser());
@@ -80,7 +72,7 @@ public class UserRepositoryTests : IDisposable
         Assert.Throws<DbUpdateException>(() => Repository.Create(duplicate));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Update_RejectsDuplicateLogin()
     {
         Repository.Create(TestDatabase.NewUser("first"));
@@ -91,7 +83,7 @@ public class UserRepositoryTests : IDisposable
         Assert.Equal("second", Repository.GetById(second.Id)!.Login);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Delete_CascadesCardsAndKeepsHistoryWithNullUserId()
     {
         var user = Repository.Create(TestDatabase.NewUser());
@@ -106,7 +98,7 @@ public class UserRepositoryTests : IDisposable
         Assert.Equal("test_user", attempts.GetById(attempt.Id)!.LoginEntered);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Transaction_RollbackCancelsRepositorySave()
     {
         using (var transaction = _database.Context.Database.BeginTransaction())

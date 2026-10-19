@@ -10,7 +10,7 @@ public class BankCardRepositoryTests : IDisposable
     private readonly TestDatabase _database = new();
     private BankCardRepository Repository => new(_database.Context);
 
-    [SqlServerFact]
+    [Fact]
     public void Create_SavesCardWithUserForeignKey()
     {
         var user = _database.AddUser();
@@ -19,8 +19,8 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Equal(user.Id, Repository.GetById(card.Id)!.UserId);
     }
 
-    [SqlServerFact]
-    public void GetAllAndGetByUserId_ReturnCorrectCards()
+    [Fact]
+    public void GetAll_ReturnsCardsForDifferentUsers()
     {
         var first = _database.AddUser("first");
         var second = _database.AddUser("second");
@@ -28,14 +28,14 @@ public class BankCardRepositoryTests : IDisposable
         Repository.Create(TestDatabase.NewCard(first.Id));
         Repository.Create(TestDatabase.NewCard(second.Id));
         Assert.Equal(3, Repository.GetAll().Count);
-        Assert.Equal(2, Repository.GetByUserId(first.Id).Count);
-        Assert.Empty(Repository.GetByUserId(999));
+        Assert.Equal(2, Repository.GetAll().Count(card => card.UserId == first.Id));
+        Assert.Single(Repository.GetAll().Where(card => card.UserId == second.Id));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void GetById_ReturnsNullForMissingCard() => Assert.Null(Repository.GetById(999));
 
-    [SqlServerFact]
+    [Fact]
     public void Update_ChangesPersistedCard()
     {
         var user = _database.AddUser();
@@ -48,10 +48,10 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Equal(6, Repository.GetById(card.Id)!.ExpirationMonth);
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Update_ReturnsFalseForMissingCard() => Assert.False(Repository.Update(new BankCard { Id = 999 }));
 
-    [SqlServerFact]
+    [Fact]
     public void Delete_RemovesCard()
     {
         var user = _database.AddUser();
@@ -62,11 +62,11 @@ public class BankCardRepositoryTests : IDisposable
         Assert.NotNull(new UserRepository(_database.Context).GetById(user.Id));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Create_RejectsMissingUser() =>
         Assert.Throws<DbUpdateException>(() => Repository.Create(TestDatabase.NewCard(999)));
 
-    [SqlServerFact]
+    [Fact]
     public void Update_RejectsMissingUser()
     {
         var user = _database.AddUser();
@@ -77,7 +77,7 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Equal(user.Id, Repository.GetById(card.Id)!.UserId);
     }
 
-    [SqlServerTheory]
+    [Theory]
     [InlineData(0)]
     [InlineData(13)]
     public void Create_RejectsInvalidExpirationMonth(int month)
@@ -88,7 +88,7 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Throws<DbUpdateException>(() => Repository.Create(card));
     }
 
-    [SqlServerTheory]
+    [Theory]
     [InlineData("123")]
     [InlineData("abcd")]
     public void Create_RejectsInvalidLastFourDigits(string digits)
@@ -99,7 +99,7 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Throws<DbUpdateException>(() => Repository.Create(card));
     }
 
-    [SqlServerFact]
+    [Fact]
     public void Transaction_RollbackCancelsRepositorySave()
     {
         var user = _database.AddUser();

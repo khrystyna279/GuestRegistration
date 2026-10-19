@@ -20,8 +20,6 @@ public class BankCardRepository : IBankCardRepository
 
     public List<BankCard> GetAll() => _context.BankCards.AsNoTracking().OrderBy(card => card.Id).ToList();
     public BankCard? GetById(int id) => _context.BankCards.AsNoTracking().FirstOrDefault(card => card.Id == id);
-    public List<BankCard> GetByUserId(int userId) => _context.BankCards.AsNoTracking()
-        .Where(card => card.UserId == userId).OrderBy(card => card.Id).ToList();
 
     public bool Update(BankCard card)
     {
