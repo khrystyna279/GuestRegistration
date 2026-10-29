@@ -1,14 +1,18 @@
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
+using GuestRegistration.DAL.Interfaces;
 using GuestRegistration.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace GuestRegistration.Tests;
 
-public class LoginAttemptRepositoryTests : IDisposable
+public class LoginAttemptRepositoryTests : RepositoryContractTests<LoginAttemptDto>
 {
-    private readonly TestDatabase _database = new();
-    private LoginAttemptRepository Repository => new(_database.Context);
+    protected override IRepository<LoginAttemptDto> Repository => new LoginAttemptRepository(_database.Context);
+    protected override LoginAttemptDto NewRecord() => TestDatabase.NewAttempt(null);
+    protected override void ChangeRecord(LoginAttemptDto dto) => dto.LoginEntered = "changed";
+    protected override string ReadMarker(LoginAttemptDto dto) => dto.LoginEntered;
+    protected override string DirectUpdateSql => "UPDATE dbo.LoginAttempts SET LoginEntered = N'SQL changed', RowInsertTime = '20000101', UpdateTime = '20000101' WHERE Id = {0}";
 
     [Fact]
     public void Create_SavesKnownUserAttempt()
@@ -54,7 +58,7 @@ public class LoginAttemptRepositoryTests : IDisposable
 
     [Fact]
     public void Update_ReturnsFalseForMissingAttempt() =>
-        Assert.False(Repository.Update(new LoginAttempt { Id = 999 }));
+        Assert.False(Repository.Update(new LoginAttemptDto { Id = 999 }));
 
     [Fact]
     public void Delete_RemovesAttempt()
@@ -81,5 +85,4 @@ public class LoginAttemptRepositoryTests : IDisposable
         Assert.Empty(Repository.GetAll());
     }
 
-    public void Dispose() => _database.Dispose();
 }

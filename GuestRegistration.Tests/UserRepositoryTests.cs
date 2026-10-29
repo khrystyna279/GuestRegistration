@@ -1,14 +1,18 @@
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
+using GuestRegistration.DAL.Interfaces;
 using GuestRegistration.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace GuestRegistration.Tests;
 
-public class UserRepositoryTests : IDisposable
+public class UserRepositoryTests : RepositoryContractTests<UserDto>
 {
-    private readonly TestDatabase _database = new();
-    private UserRepository Repository => new(_database.Context);
+    protected override IRepository<UserDto> Repository => new UserRepository(_database.Context);
+    protected override UserDto NewRecord() => TestDatabase.NewUser();
+    protected override void ChangeRecord(UserDto dto) => dto.FirstName = "Changed";
+    protected override string ReadMarker(UserDto dto) => dto.FirstName;
+    protected override string DirectUpdateSql => "UPDATE dbo.Users SET FirstName = N'SQL changed', RowInsertTime = '20000101', UpdateTime = '20000101' WHERE Id = {0}";
 
     [Fact]
     public void Create_SavesUserAndGeneratesId()
@@ -30,6 +34,17 @@ public class UserRepositoryTests : IDisposable
     public void GetById_ReturnsNullForMissingUser() => Assert.Null(Repository.GetById(999));
 
     [Fact]
+    public void FindByLoginAndEmail_ReturnsDtoOrNull()
+    {
+        var repository = new UserRepository(_database.Context);
+        var user = repository.Create(TestDatabase.NewUser());
+        Assert.Equal(user.Id, repository.FindByLogin(user.Login)!.Id);
+        Assert.Equal(user.Id, repository.FindByEmail(user.Email)!.Id);
+        Assert.Null(repository.FindByLogin("missing"));
+        Assert.Null(repository.FindByEmail("missing@example.com"));
+    }
+
+    [Fact]
     public void Update_ChangesPersistedFields()
     {
         var user = Repository.Create(TestDatabase.NewUser());
@@ -42,7 +57,7 @@ public class UserRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Update_ReturnsFalseForMissingUser() => Assert.False(Repository.Update(new User { Id = 999 }));
+    public void Update_ReturnsFalseForMissingUser() => Assert.False(Repository.Update(new UserDto { Id = 999 }));
 
     [Fact]
     public void Delete_RemovesUser()
@@ -111,5 +126,4 @@ public class UserRepositoryTests : IDisposable
         Assert.Empty(Repository.GetAll());
     }
 
-    public void Dispose() => _database.Dispose();
 }

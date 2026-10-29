@@ -4,6 +4,8 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GuestRegistration.Business\GuestRegistration.Business.csproj" />
+    <ProjectReference Include="..\GuestRegistration.DTO\GuestRegistration.DTO.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
@@ -12,6 +14,9 @@
     <ProjectReference Include="..\GuestRegistration.DAL\GuestRegistration.DAL.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="appsettings.test.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\database\01_CreateTables.sql" Link="sql\01_CreateTables.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\06_AddAuditColumns.sql" Link="sql\06_AddAuditColumns.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\07_AddUserRole.sql" Link="sql\07_AddUserRole.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

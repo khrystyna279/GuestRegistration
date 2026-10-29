@@ -1,5 +1,7 @@
 using GuestRegistration.DAL.Data;
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
+using GuestRegistration.DAL.Repositories;
+using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +16,7 @@ public class TestDatabase : IDisposable
     public TestDatabase()
     {
         string connectionString = Environment.GetEnvironmentVariable("GUEST_TEST_CONNECTION")
-            ?? "Server=localhost;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=5";
+            ?? ReadConfiguredConnection();
         var admin = new SqlConnectionStringBuilder(connectionString) { InitialCatalog = "master", Pooling = false };
         _adminConnectionString = admin.ConnectionString;
         using (var connection = new SqlConnection(_adminConnectionString))
@@ -37,33 +39,39 @@ public class TestDatabase : IDisposable
         catch { Dispose(); throw; }
     }
 
-    public User AddUser(string login = "test_user")
+    public UserDto AddUser(string login = "test_user")
     {
         var user = NewUser(login);
-        Context.Users.Add(user);
-        Context.SaveChanges();
-        return user;
+        return new UserRepository(Context).Create(user);
     }
 
-    public static User NewUser(string login = "test_user") => new()
+    public static UserDto NewUser(string login = "test_user") => new()
     {
         Login = login, FirstName = "Test", LastName = "Student",
         PasswordHash = "demo_password_hash",
         RecoveryWordHash = "demo_recovery_hash",
         Gender = "Other", Address = "Test Street 1", Email = login + "@example.com",
-        Phone = "+380991234567", CreatedAtUtc = DateTime.UtcNow
+        Phone = "+380991234567", CreatedAtUtc = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc)
     };
 
-    public static BankCard NewCard(int userId) => new()
+    public static BankCardDto NewCard(int userId) => new()
     {
         UserId = userId, CardHolder = "TEST STUDENT", Brand = "Visa", LastFourDigits = "1111",
         ExpirationMonth = 12, ExpirationYear = 2099
     };
 
-    public static LoginAttempt NewAttempt(int? userId) => new()
+    public static LoginAttemptDto NewAttempt(int? userId) => new()
     {
-        UserId = userId, LoginEntered = "test_user", AttemptedAtUtc = DateTime.UtcNow, IsSuccessful = true
+        UserId = userId, LoginEntered = "test_user",
+        AttemptedAtUtc = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc), IsSuccessful = true
     };
+
+    private static string ReadConfiguredConnection()
+    {
+        using var settings = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "appsettings.test.json")));
+        return settings.RootElement.GetProperty("ConnectionStrings").GetProperty("TestDatabase").GetString()
+            ?? throw new InvalidOperationException("Set the test database connection in appsettings.test.json.");
+    }
 
     public void Dispose()
     {

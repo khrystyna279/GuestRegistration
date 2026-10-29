@@ -1,14 +1,18 @@
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
+using GuestRegistration.DAL.Interfaces;
 using GuestRegistration.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace GuestRegistration.Tests;
 
-public class BankCardRepositoryTests : IDisposable
+public class BankCardRepositoryTests : RepositoryContractTests<BankCardDto>
 {
-    private readonly TestDatabase _database = new();
-    private BankCardRepository Repository => new(_database.Context);
+    protected override IRepository<BankCardDto> Repository => new BankCardRepository(_database.Context);
+    protected override BankCardDto NewRecord() => TestDatabase.NewCard(_database.AddUser().Id);
+    protected override void ChangeRecord(BankCardDto dto) => dto.CardHolder = "CHANGED HOLDER";
+    protected override string ReadMarker(BankCardDto dto) => dto.CardHolder;
+    protected override string DirectUpdateSql => "UPDATE dbo.BankCards SET CardHolder = N'SQL changed', RowInsertTime = '20000101', UpdateTime = '20000101' WHERE Id = {0}";
 
     [Fact]
     public void Create_SavesCardWithUserForeignKey()
@@ -49,7 +53,7 @@ public class BankCardRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Update_ReturnsFalseForMissingCard() => Assert.False(Repository.Update(new BankCard { Id = 999 }));
+    public void Update_ReturnsFalseForMissingCard() => Assert.False(Repository.Update(new BankCardDto { Id = 999 }));
 
     [Fact]
     public void Delete_RemovesCard()
@@ -112,5 +116,4 @@ public class BankCardRepositoryTests : IDisposable
         Assert.Empty(Repository.GetAll());
     }
 
-    public void Dispose() => _database.Dispose();
 }
