@@ -1,41 +1,35 @@
 using GuestRegistration.DAL.Data;
 using GuestRegistration.DAL.Interfaces;
 using GuestRegistration.DAL.Models;
-using Microsoft.EntityFrameworkCore;
+using GuestRegistration.DTO;
 
 namespace GuestRegistration.DAL.Repositories;
 
-public class BankCardRepository : IBankCardRepository
+public sealed class BankCardRepository : RepositoryBase<BankCard, BankCardDto>, IBankCardRepository
 {
-    private readonly AppDbContext _context;
+    public BankCardRepository(AppDbContext context) : base(context) { }
 
-    public BankCardRepository(AppDbContext context) => _context = context;
-
-    public BankCard Create(BankCard card)
+    protected override BankCardDto ToDto(BankCard entity) => new()
     {
-        _context.BankCards.Add(card);
-        _context.SaveChanges();
-        return card;
-    }
+        Id = entity.Id,
+        UserId = entity.UserId,
+        CardHolder = entity.CardHolder,
+        Brand = entity.Brand,
+        LastFourDigits = entity.LastFourDigits,
+        ExpirationMonth = entity.ExpirationMonth,
+        ExpirationYear = entity.ExpirationYear,
+        RowInsertTime = entity.RowInsertTime,
+        UpdateTime = entity.UpdateTime
+    };
 
-    public List<BankCard> GetAll() => _context.BankCards.AsNoTracking().OrderBy(card => card.Id).ToList();
-    public BankCard? GetById(int id) => _context.BankCards.AsNoTracking().FirstOrDefault(card => card.Id == id);
-
-    public bool Update(BankCard card)
+    protected override BankCard ToEntity(BankCardDto dto) => new()
     {
-        var existing = _context.BankCards.Find(card.Id);
-        if (existing == null) return false;
-        _context.Entry(existing).CurrentValues.SetValues(card);
-        _context.SaveChanges();
-        return true;
-    }
-
-    public bool Delete(int id)
-    {
-        var card = _context.BankCards.Find(id);
-        if (card == null) return false;
-        _context.BankCards.Remove(card);
-        _context.SaveChanges();
-        return true;
-    }
+        Id = dto.Id,
+        UserId = dto.UserId,
+        CardHolder = dto.CardHolder,
+        Brand = dto.Brand,
+        LastFourDigits = dto.LastFourDigits,
+        ExpirationMonth = dto.ExpirationMonth,
+        ExpirationYear = dto.ExpirationYear
+    };
 }

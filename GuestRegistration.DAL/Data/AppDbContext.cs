@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GuestRegistration.DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +54,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.Login, "IX_Users_Login").IsUnique();
 
+            entity.Property(e => e.RoleCode).HasMaxLength(30).IsUnicode(false).HasDefaultValue("Guest");
             entity.Property(e => e.Address).HasMaxLength(200);
             entity.Property(e => e.CreatedAtUtc).HasPrecision(0);
             entity.Property(e => e.Email)

@@ -1,12 +1,7 @@
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
 
 namespace GuestRegistration.DAL.Interfaces;
 
-public interface ILoginAttemptRepository
+public interface ILoginAttemptRepository : IRepository<LoginAttemptDto>
 {
-    LoginAttempt Create(LoginAttempt attempt);
-    List<LoginAttempt> GetAll();
-    LoginAttempt? GetById(int id);
-    bool Update(LoginAttempt attempt);
-    bool Delete(int id);
 }

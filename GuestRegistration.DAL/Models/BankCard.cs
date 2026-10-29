@@ -7,6 +7,10 @@ public partial class BankCard
 {
     public int Id { get; set; }
 
+    public DateTime RowInsertTime { get; set; }
+
+    public DateTime UpdateTime { get; set; }
+
     public int UserId { get; set; }
 
     public string CardHolder { get; set; } = null!;

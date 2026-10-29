@@ -15,6 +15,9 @@ BEGIN TRANSACTION;
 CREATE TABLE dbo.Users
 (
     Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Users PRIMARY KEY,
+    RowInsertTime DATETIME2(7) NOT NULL CONSTRAINT DF_Users_RowInsertTime DEFAULT SYSUTCDATETIME(),
+    UpdateTime DATETIME2(7) NOT NULL CONSTRAINT DF_Users_UpdateTime DEFAULT SYSUTCDATETIME(),
+    RoleCode VARCHAR(30) NOT NULL CONSTRAINT DF_Users_RoleCode DEFAULT 'Guest',
     Login NVARCHAR(30) COLLATE Latin1_General_100_BIN2 NOT NULL,
     FirstName NVARCHAR(50) NOT NULL,
     LastName NVARCHAR(50) NOT NULL,
@@ -45,6 +48,8 @@ CREATE UNIQUE INDEX IX_Users_Email ON dbo.Users(Email);
 CREATE TABLE dbo.BankCards
 (
     Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_BankCards PRIMARY KEY,
+    RowInsertTime DATETIME2(7) NOT NULL CONSTRAINT DF_BankCards_RowInsertTime DEFAULT SYSUTCDATETIME(),
+    UpdateTime DATETIME2(7) NOT NULL CONSTRAINT DF_BankCards_UpdateTime DEFAULT SYSUTCDATETIME(),
     UserId INT NOT NULL,
     CardHolder NVARCHAR(100) NOT NULL,
     Brand VARCHAR(20) NOT NULL,
@@ -67,6 +72,8 @@ CREATE INDEX IX_BankCards_UserId ON dbo.BankCards(UserId);
 CREATE TABLE dbo.LoginAttempts
 (
     Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_LoginAttempts PRIMARY KEY,
+    RowInsertTime DATETIME2(7) NOT NULL CONSTRAINT DF_LoginAttempts_RowInsertTime DEFAULT SYSUTCDATETIME(),
+    UpdateTime DATETIME2(7) NOT NULL CONSTRAINT DF_LoginAttempts_UpdateTime DEFAULT SYSUTCDATETIME(),
     UserId INT NULL,
     LoginEntered NVARCHAR(30) NOT NULL,
     AttemptedAtUtc DATETIME2(0) NOT NULL,
@@ -77,4 +84,45 @@ CREATE TABLE dbo.LoginAttempts
 );
 
 CREATE INDEX IX_LoginAttempts_UserId ON dbo.LoginAttempts(UserId);
+EXEC(N'CREATE OR ALTER TRIGGER dbo.TR_Users_AuditTime ON dbo.Users
+AFTER UPDATE AS
+BEGIN
+    SET NOCOUNT ON;
+    IF TRIGGER_NESTLEVEL(OBJECT_ID(N''dbo.TR_Users_AuditTime''), ''AFTER'', ''DML'') > 1 RETURN;
+    DECLARE @now DATETIME2(7) = SYSUTCDATETIME();
+    UPDATE target
+    SET RowInsertTime = previous.RowInsertTime,
+        UpdateTime = CASE WHEN @now > previous.UpdateTime THEN @now ELSE DATEADD(NANOSECOND, 100, previous.UpdateTime) END
+    FROM dbo.Users AS target
+    INNER JOIN inserted AS changed ON changed.Id = target.Id
+    INNER JOIN deleted AS previous ON previous.Id = target.Id;
+END;');
+
+EXEC(N'CREATE OR ALTER TRIGGER dbo.TR_BankCards_AuditTime ON dbo.BankCards
+AFTER UPDATE AS
+BEGIN
+    SET NOCOUNT ON;
+    IF TRIGGER_NESTLEVEL(OBJECT_ID(N''dbo.TR_BankCards_AuditTime''), ''AFTER'', ''DML'') > 1 RETURN;
+    DECLARE @now DATETIME2(7) = SYSUTCDATETIME();
+    UPDATE target
+    SET RowInsertTime = previous.RowInsertTime,
+        UpdateTime = CASE WHEN @now > previous.UpdateTime THEN @now ELSE DATEADD(NANOSECOND, 100, previous.UpdateTime) END
+    FROM dbo.BankCards AS target
+    INNER JOIN inserted AS changed ON changed.Id = target.Id
+    INNER JOIN deleted AS previous ON previous.Id = target.Id;
+END;');
+
+EXEC(N'CREATE OR ALTER TRIGGER dbo.TR_LoginAttempts_AuditTime ON dbo.LoginAttempts
+AFTER UPDATE AS
+BEGIN
+    SET NOCOUNT ON;
+    IF TRIGGER_NESTLEVEL(OBJECT_ID(N''dbo.TR_LoginAttempts_AuditTime''), ''AFTER'', ''DML'') > 1 RETURN;
+    DECLARE @now DATETIME2(7) = SYSUTCDATETIME();
+    UPDATE target
+    SET RowInsertTime = previous.RowInsertTime,
+        UpdateTime = CASE WHEN @now > previous.UpdateTime THEN @now ELSE DATEADD(NANOSECOND, 100, previous.UpdateTime) END
+    FROM dbo.LoginAttempts AS target
+    INNER JOIN inserted AS changed ON changed.Id = target.Id
+    INNER JOIN deleted AS previous ON previous.Id = target.Id;
+END;');
 COMMIT TRANSACTION;

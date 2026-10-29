@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\GuestRegistration.DAL\GuestRegistration.DAL.csproj" />
+    <ProjectReference Include="..\GuestRegistration.DTO\GuestRegistration.DTO.csproj" />
+  </ItemGroup>
+</Project>

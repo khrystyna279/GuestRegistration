@@ -1,5 +1,8 @@
 using System.Text;
 using GuestRegistration.ConsoleApp;
+using GuestRegistration.ConsoleApp.Commands;
+using GuestRegistration.ConsoleApp.Menu;
+using GuestRegistration.DTO;
 using GuestRegistration.DAL.Data;
 using GuestRegistration.DAL.Repositories;
 using Microsoft.Data.SqlClient;
@@ -20,7 +23,7 @@ catch (Exception exception) when (exception is SqlException or InvalidOperationE
 {
     Console.WriteLine("Не вдалося відкрити базу GuestRegistrationCourse.");
     Console.WriteLine("1. Підключіться до SQL Server у SSMS.");
-    Console.WriteLine("2. Виконайте скрипти database/00, 01 та 02 за інструкцією.");
+    Console.WriteLine("2. Для нової бази виконайте database/00–02, для наявної — 06_AddAuditColumns.sql.");
     Console.WriteLine("3. Перевірте Server та спосіб входу в appsettings.json.");
     Console.WriteLine("Деталі: " + exception.Message);
     return;
@@ -28,15 +31,19 @@ catch (Exception exception) when (exception is SqlException or InvalidOperationE
 var connectionDetails = new SqlConnectionStringBuilder(connectionString);
 Console.WriteLine($"SQL Server: {connectionDetails.DataSource}; база: {connectionDetails.InitialCatalog}");
 
-var dalMenu = new DalMenu(new UserRepository(context), new BankCardRepository(context),
-    new LoginAttemptRepository(context));
+var menu = new ConsoleMenu("Демонстрація DAL / CRUD", new IConsoleCommand[]
+{
+    new EntityMenu<UserDto>("1", "Users", new UserRepository(context), DtoInput.ReadUser, DtoOutput.PrintUser,
+        "Картки також видаляться; історія входів залишиться без UserId."),
+    new EntityMenu<BankCardDto>("2", "BankCards", new BankCardRepository(context), DtoInput.ReadCard, DtoOutput.PrintCard),
+    new EntityMenu<LoginAttemptDto>("3", "LoginAttempts", new LoginAttemptRepository(context), DtoInput.ReadAttempt, DtoOutput.PrintAttempt)
+}, "вихід");
 bool running = true;
 while (running)
 {
-    Console.WriteLine("\n=== Демонстрація DAL / CRUD ===");
     try
     {
-        running = dalMenu.Run();
+        running = menu.RunOnce();
     }
     catch (ArgumentException exception)
     {

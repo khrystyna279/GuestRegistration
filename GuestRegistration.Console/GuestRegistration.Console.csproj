@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GuestRegistration.DTO\GuestRegistration.DTO.csproj" />
     <ProjectReference Include="..\GuestRegistration.DAL\GuestRegistration.DAL.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>

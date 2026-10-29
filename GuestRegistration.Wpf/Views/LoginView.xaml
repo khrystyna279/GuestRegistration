@@ -1,0 +1,11 @@
+<UserControl x:Class="GuestRegistration.Wpf.Views.LoginView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:infra="clr-namespace:GuestRegistration.Wpf.Infrastructure">
+<StackPanel MaxWidth="440" HorizontalAlignment="Left">
+ <TextBlock Text="Вхід до облікового запису" Style="{StaticResource Heading}"/>
+ <TextBlock Text="Увійдіть, щоб переглянути свій профіль. Якщо облікового запису ще немає — оберіть реєстрацію." Style="{StaticResource Description}"/>
+<TextBlock Text="Логін" Style="{StaticResource Label}"/><TextBox MaxLength="30" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [Login]}" Style="{StaticResource FieldError}"/><TextBlock Text="Пароль" Style="{StaticResource Label}"/><PasswordBox MaxLength="100" infra:PasswordBinding.Enabled="True" infra:PasswordBinding.Value="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [Password]}" Style="{StaticResource FieldError}"/>
+ <Button Content="Увійти" Command="{Binding SubmitCommand}" Style="{StaticResource PrimaryButton}" IsDefault="True"/>
+ <TextBlock Text="{Binding Message}" Style="{StaticResource Message}"/>
+</StackPanel>
+</UserControl>

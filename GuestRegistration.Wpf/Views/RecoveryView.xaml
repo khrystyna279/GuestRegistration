@@ -1,0 +1,11 @@
+<UserControl x:Class="GuestRegistration.Wpf.Views.RecoveryView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:infra="clr-namespace:GuestRegistration.Wpf.Infrastructure">
+<StackPanel MaxWidth="470" HorizontalAlignment="Left">
+ <TextBlock Text="Відновлення пароля" Style="{StaticResource Heading}"/>
+ <TextBlock Text="Вкажіть логін і ключове слово, задане під час реєстрації, та оберіть новий пароль." Style="{StaticResource Description}"/>
+<TextBlock Text="Логін" Style="{StaticResource Label}"/><TextBox MaxLength="30" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [Login]}" Style="{StaticResource FieldError}"/><TextBlock Text="Ключове слово" Style="{StaticResource Label}"/><PasswordBox MaxLength="100" infra:PasswordBinding.Enabled="True" infra:PasswordBinding.Value="{Binding RecoveryWord, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [RecoveryWord]}" Style="{StaticResource FieldError}"/><TextBlock Text="Новий пароль" Style="{StaticResource Label}"/><PasswordBox MaxLength="100" infra:PasswordBinding.Enabled="True" infra:PasswordBinding.Value="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [Password]}" Style="{StaticResource FieldError}"/><TextBlock Text="Підтвердження нового пароля" Style="{StaticResource Label}"/><PasswordBox MaxLength="100" infra:PasswordBinding.Enabled="True" infra:PasswordBinding.Value="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"/><TextBlock Text="{Binding [ConfirmPassword]}" Style="{StaticResource FieldError}"/>
+ <Button Content="Змінити пароль" Command="{Binding SubmitCommand}" Style="{StaticResource PrimaryButton}"/>
+ <TextBlock Text="{Binding Message}" Style="{StaticResource Message}"/>
+</StackPanel>
+</UserControl>

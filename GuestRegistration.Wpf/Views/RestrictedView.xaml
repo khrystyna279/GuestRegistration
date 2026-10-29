@@ -1,0 +1,9 @@
+<UserControl x:Class="GuestRegistration.Wpf.Views.RestrictedView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:infra="clr-namespace:GuestRegistration.Wpf.Infrastructure">
+<StackPanel MaxWidth="550" HorizontalAlignment="Left">
+ <TextBlock Text="Доступ обмежено" Style="{StaticResource Heading}"/>
+ <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" Margin="0,8,0,16"/>
+ <TextBlock Text="Вхід виконано, але цей обліковий запис не має ролі Guest, потрібної для доступу до профілю. Ви можете вийти та увійти іншим обліковим записом." Style="{StaticResource Description}"/>
+</StackPanel>
+</UserControl>

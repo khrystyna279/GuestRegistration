@@ -1,12 +1,9 @@
-using GuestRegistration.DAL.Models;
+using GuestRegistration.DTO;
 
 namespace GuestRegistration.DAL.Interfaces;
 
-public interface IUserRepository
+public interface IUserRepository : IRepository<UserDto>
 {
-    User Create(User user);
-    List<User> GetAll();
-    User? GetById(int id);
-    bool Update(User user);
-    bool Delete(int id);
+    UserDto? FindByLogin(string login);
+    UserDto? FindByEmail(string email);
 }

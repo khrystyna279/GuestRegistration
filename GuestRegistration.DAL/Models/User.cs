@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace GuestRegistration.DAL.Models;
@@ -6,6 +6,12 @@ namespace GuestRegistration.DAL.Models;
 public partial class User
 {
     public int Id { get; set; }
+
+    public DateTime RowInsertTime { get; set; }
+
+    public DateTime UpdateTime { get; set; }
+
+    public string RoleCode { get; set; } = "Guest";
 
     public string Login { get; set; } = null!;
 
