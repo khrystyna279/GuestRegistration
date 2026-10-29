@@ -1,0 +1,10 @@
+.vs/
+work/
+**/bin/
+**/obj/
+**/TestResults/
+**/*.user
+**/*.bak
+**/*.mdf
+**/*.ldf
+**/appsettings.local.json
